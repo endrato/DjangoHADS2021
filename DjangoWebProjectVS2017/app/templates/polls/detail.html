@@ -1,0 +1,30 @@
+﻿{% extends "app/layout.html" %}
+{% block content %}
+
+<h1>{{ title }}</h1>
+    <h3>Pregunta: {{ question.question_text }}</h3>
+    {% if error_message %}<p><strong style="color:red;"><b>{{ error_message }}</b></strong></p>{% endif %}
+    <form action="{% url 'vote' question.id %}" method="POST">
+    {% csrf_token %}
+    {% if request.user.is_authenticated %}
+        <ul>
+        {% for choice in question.choice_set.all %}
+            <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }} {% if choice.correct %} <label style="color: green"> // Respuesta Correcta.</label> {%else%} <label style="color: red"> // Respuesta Incorrecta.</label> {% endif %}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        {% for choice in question.choice_set.all %}
+            <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label>
+            <br />
+        {% endfor %}
+    {% endif %}
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'choice_add' question.id %}"><h3>Insertar Opciones</h3></a> 
+        <a href="{% url 'chart' question.id %}"> <h3>Ver resultado de la votacion</h3> </a><br />
+    {% else %}
+        <button type="submit" id="button">Vote</button><br />
+    {% endif %}
+        <a href="{% url 'index' %}">Seleccionar otra pregunta.</a>
+    </form>
+{% endblock %}
